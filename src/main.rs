@@ -116,14 +116,14 @@ fn probability_of_success_with_turbo_tokens(die: Die, turbo_tokens: u32, dc: u32
     // If the DC is higher than the maximum value of the die, explode the die and recurse.
     (1..=die.sides())
         .map(|roll| { // Consider all possible rolls with the current die.
-            if roll + turbo_tokens < die.sides() {
+            if roll + turbo_tokens < die.sides() - 1 {
                 // The die cannot explode, even with using all turbo tokens.
                 return 0.0;
             }
 
             // Die will explode (it must for a chance to beat the DC).
-            let tokens_needed_to_explode = die.sides() - roll;
-            probability_of_success_with_turbo_tokens(die.next(), turbo_tokens - tokens_needed_to_explode, dc - die.sides())
+            let tokens_needed_to_explode = (die.sides() - roll).saturating_sub(1);
+            probability_of_success_with_turbo_tokens(die.next(), turbo_tokens - tokens_needed_to_explode, dc - roll)
                 / die.sides() as f64
         })
         .sum()
